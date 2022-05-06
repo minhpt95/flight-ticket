@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -17,7 +18,11 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TravelClassEntity extends CommonEntity {
+public class TravelClassEntity extends DateTimeEntity {
+
+    @Id
+    @Column
+    private Long travelClassId;
 
     @Column
     private String name;

@@ -1,6 +1,7 @@
 package com.catdev.project.entity.aircraft;
 
 import com.catdev.project.entity.common.CommonEntity;
+import com.catdev.project.entity.common.DateTimeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,12 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AircraftManufacturerEntity extends CommonEntity {
+public class AircraftManufacturerEntity extends DateTimeEntity {
+
+    @Id
+    @Column
+    private Long aircraftManufacturerId;
+
     @Column
     private String name;
 

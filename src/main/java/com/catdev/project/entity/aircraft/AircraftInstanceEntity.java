@@ -18,9 +18,17 @@ import javax.persistence.*;
 public class AircraftInstanceEntity extends DateTimeEntity {
     @Id
     @Column
-    private int aircraftInstanceId;
+    private Long aircraftInstanceId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(
+        fetch = FetchType.LAZY,
+        cascade = {
+            CascadeType.DETACH,
+            CascadeType.MERGE,
+            CascadeType.PERSIST,
+            CascadeType.REFRESH
+        }
+    )
     @JoinColumn(name = "aircraft_id")
     private AircraftEntity aircraft;
 }

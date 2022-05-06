@@ -37,4 +37,9 @@ public class ClientEntity extends DateTimeEntity {
 
     @Column
     private String passport;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_code")
+    private CountryEntity countryEntity;
+
+
 }

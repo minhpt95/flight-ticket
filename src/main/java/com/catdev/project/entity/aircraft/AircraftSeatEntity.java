@@ -21,9 +21,10 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class AircraftSeatEntity extends DateTimeEntity {
     @EmbeddedId
-    private AircraftSeatId AircraftSeatId;
+    private AircraftSeatId aircraftSeatId;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "travel_class_id")
     private TravelClassEntity travelClass;
 }
 
@@ -36,7 +37,7 @@ class AircraftSeatId implements Serializable {
     @Serial
     private static final long serialVersionUID = -4742105540713056892L;
 
-    private Long id;
+    private Long seatId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "aircraft_id")

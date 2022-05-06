@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "country")
@@ -22,4 +23,20 @@ public class CountryEntity extends DateTimeEntity {
 
     @Column(length = 45)
     private String name;
+
+    @OneToMany(fetch = FetchType.LAZY,cascade = {
+            CascadeType.DETACH,
+            CascadeType.MERGE,
+            CascadeType.PERSIST,
+            CascadeType.REFRESH
+    },mappedBy = "countryEntity")
+    private Set<ClientEntity> clientEntities;
+
+    @OneToMany(fetch = FetchType.LAZY,cascade = {
+            CascadeType.DETACH,
+            CascadeType.MERGE,
+            CascadeType.PERSIST,
+            CascadeType.REFRESH
+    },mappedBy = "countryEntity")
+    private Set<AirportEntity> airportEntities;
 }
