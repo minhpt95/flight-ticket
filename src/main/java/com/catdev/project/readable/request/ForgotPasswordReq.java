@@ -1,7 +1,15 @@
 package com.catdev.project.readable.request;
 
-import javax.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
+@Getter
+@Setter
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class ForgotPasswordReq {
     @NotEmpty
     private String email;

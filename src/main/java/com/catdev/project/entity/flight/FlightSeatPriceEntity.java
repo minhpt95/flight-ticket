@@ -45,6 +45,9 @@ class FlightSeatPriceEntityId implements Serializable {
 
 
     @ManyToOne
-    @JoinColumn(name = "seat_id")
+    @JoinColumns({
+            @JoinColumn(name = "seat_id", insertable = false, updatable = false),
+            @JoinColumn(name = "aircraft_id", insertable = false, updatable = false)
+    })
     private AircraftSeatEntity aircraftSeat;
 }
