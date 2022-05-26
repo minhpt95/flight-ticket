@@ -1,4 +1,4 @@
-package com.catdev.project.jwt.exception;
+package com.catdev.project.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

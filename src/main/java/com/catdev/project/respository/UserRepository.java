@@ -13,12 +13,14 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Long> , JpaSpecificationExecutor<UserEntity> {
     Optional<UserEntity> findByEmail(String email);
 
+    Optional<UserEntity> findUserEntityByUserTelegramId(Long userTelegramId);
+
     @Override
     boolean existsById(Long id);
 
     Page<UserEntity> findAll(Pageable pageable);
 
-    List<UserEntity> findAllByEmail(String email);
+    Optional<UserEntity> findAllByEmail(String email);
 
     UserEntity findUserEntityById(Long id);
 

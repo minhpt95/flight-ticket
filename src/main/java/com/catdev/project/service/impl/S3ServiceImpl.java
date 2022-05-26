@@ -3,11 +3,10 @@ package com.catdev.project.service.impl;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.Region;
 import com.catdev.project.constant.CommonConstant;
-import com.catdev.project.jwt.exception.ErrorResponse;
-import com.catdev.project.jwt.exception.ProductException;
+import com.catdev.project.exception.ErrorResponse;
+import com.catdev.project.exception.ProductException;
 import com.catdev.project.service.S3Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
-import javax.mail.Multipart;
 
 @Service
 @AllArgsConstructor

@@ -50,40 +50,43 @@ public class UserController {
         responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
         responseDto.setMessage(ErrorConstant.Message.SUCCESS);
         responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
+        
         return responseDto;
     }
 
     @PutMapping(value = "/changePassword")
     public  ResponseDto<Boolean> changePassword(@Valid @RequestBody ChangePasswordReq changePasswordReq){
         ResponseDto<Boolean> responseDto = new ResponseDto<>();
+        
         responseDto.setContent(userService.changePassword(changePasswordReq));
         responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
         responseDto.setMessage(ErrorConstant.Message.SUCCESS);
         responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
+        
         return responseDto;
     }
 
     @PutMapping(value = "/changeStatus")
     public  ResponseDto<Boolean> changeStatus(@Valid @RequestBody ChangeStatusAccountReq changeStatusAccountReq){
         ResponseDto<Boolean> responseDto = new ResponseDto<>();
+        
         responseDto.setContent(userService.changeStatus(changeStatusAccountReq));
         responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
         responseDto.setMessage(ErrorConstant.Message.SUCCESS);
         responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
+        
         return responseDto;
     }
 
     @PutMapping(value = "/updateUser")
-    public ResponseDto<UserDto> updateUser(
-            @RequestBody UpdateUserForm form
-    ) {
+    public ResponseDto<UserDto> updateUser (@RequestBody UpdateUserForm form) {
         ResponseDto<UserDto> responseDto = new ResponseDto<>();
+        
         responseDto.setContent(userService.updateUser(form));
         responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
         responseDto.setMessage(ErrorConstant.Message.SUCCESS);
         responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
+        
         return responseDto;
     }
-
-
 }

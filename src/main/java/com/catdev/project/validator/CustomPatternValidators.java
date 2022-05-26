@@ -10,7 +10,8 @@ import javax.validation.ConstraintValidatorContext;
 /**
  * @author itsol.hungtt on 1/25/2021
  */
-public class CustomPatternValidators implements ConstraintValidator<CustomPatternConstraint, String> {
+public class CustomPatternValidators implements ConstraintValidator<CustomPatternConstraint, String>
+{
 
     private final Environment environment;
 
@@ -21,13 +22,16 @@ public class CustomPatternValidators implements ConstraintValidator<CustomPatter
     private String rawValue;
 
     @Override
-    public void initialize(CustomPatternConstraint constraintAnnotation) {
+    public void initialize(CustomPatternConstraint constraintAnnotation)
+    {
         rawValue = environment.getProperty(constraintAnnotation.value());
     }
 
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        if (StringUtils.isBlank(s)) {
+    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext)
+    {
+        if (StringUtils.isBlank(s))
+        {
             return false;
         }
         return s.equals(rawValue);

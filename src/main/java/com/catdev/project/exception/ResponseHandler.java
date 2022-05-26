@@ -1,4 +1,4 @@
-package com.catdev.project.jwt.exception;
+package com.catdev.project.exception;
 
 import com.catdev.project.constant.ErrorConstant;
 import com.catdev.project.dto.ErrorBindingDto;

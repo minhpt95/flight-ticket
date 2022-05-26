@@ -2,9 +2,9 @@ package com.catdev.project.service.impl;
 
 import com.catdev.project.entity.RefreshTokenEntity;
 import com.catdev.project.entity.UserEntity;
-import com.catdev.project.jwt.exception.ErrorResponse;
-import com.catdev.project.jwt.exception.ProductException;
-import com.catdev.project.jwt.exception.TokenRefreshException;
+import com.catdev.project.exception.ErrorResponse;
+import com.catdev.project.exception.ProductException;
+import com.catdev.project.exception.TokenRefreshException;
 import com.catdev.project.respository.RefreshTokenRepository;
 import com.catdev.project.respository.UserRepository;
 import com.catdev.project.service.RefreshTokenService;

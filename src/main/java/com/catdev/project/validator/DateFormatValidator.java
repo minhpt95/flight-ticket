@@ -13,51 +13,41 @@ import java.text.SimpleDateFormat;
  * @author itsol.hungtt on 12/25/2020
  * Copyright @DONG.NV
  */
-public class DateFormatValidator implements ConstraintValidator<DateFormatConstraint, String> {
+public class DateFormatValidator implements ConstraintValidator<DateFormatConstraint, String>
+{
 
-    private String datePattern;
-    private boolean required;
+  private String datePattern;
+  private boolean required;
 
-    @Override
-    public void initialize(DateFormatConstraint dateFormatConstraint) {
-        this.datePattern = dateFormatConstraint.datePattern();
-        this.required = dateFormatConstraint.required();
+  @Override
+  public void initialize(DateFormatConstraint dateFormatConstraint)
+  {
+    this.datePattern = dateFormatConstraint.datePattern();
+    this.required = dateFormatConstraint.required();
+  }
+
+  @Override
+  public boolean isValid(String s, ConstraintValidatorContext ct)
+  {
+
+    boolean isDateBlank = StringUtils.isBlank(s);
+
+    if (isDateBlank)
+    {
+      return !required;
     }
 
-    @Override
-    public boolean isValid(String s, ConstraintValidatorContext ct) {
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
 
-        boolean isDateBlank = StringUtils.isBlank(s);
-
-        if (required) {
-            if (isDateBlank) {
-                return false;
-            }
-
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
-
-            try {
-                simpleDateFormat.parse(s);
-            } catch (ParseException e) {
-                return false;
-            }
-
-        } else {
-
-            if (isDateBlank) {
-                return true;
-            }
-
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
-            try {
-                simpleDateFormat.parse(s);
-            } catch (ParseException e) {
-                return false;
-            }
-
-        }
-
-        return true;
+    try
+    {
+      simpleDateFormat.parse(s);
+    } catch (ParseException e)
+    {
+      return false;
     }
+
+    return true;
+  }
 
 }

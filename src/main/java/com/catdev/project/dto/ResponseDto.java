@@ -1,6 +1,6 @@
 package com.catdev.project.dto;
 
-import com.catdev.project.jwt.exception.ErrorResponse;
+import com.catdev.project.exception.ErrorResponse;
 import lombok.Getter;
 import lombok.Setter;
 

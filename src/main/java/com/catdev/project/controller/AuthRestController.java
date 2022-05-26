@@ -5,9 +5,9 @@ import com.catdev.project.dto.ResponseDto;
 import com.catdev.project.dto.user.UserDto;
 import com.catdev.project.entity.RefreshTokenEntity;
 import com.catdev.project.entity.UserEntity;
-import com.catdev.project.jwt.exception.ErrorResponse;
-import com.catdev.project.jwt.exception.ProductException;
-import com.catdev.project.jwt.exception.TokenRefreshException;
+import com.catdev.project.exception.ErrorResponse;
+import com.catdev.project.exception.ProductException;
+import com.catdev.project.exception.TokenRefreshException;
 import com.catdev.project.jwt.JwtProvider;
 import com.catdev.project.jwt.JwtResponse;
 import com.catdev.project.jwt.payload.request.TokenRefreshRequest;
@@ -23,7 +23,6 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -46,158 +45,170 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/auth")
 public class AuthRestController {
 
-    final
-    AuthenticationManager authenticationManager;
+  final
+  AuthenticationManager authenticationManager;
 
-    final
-    MailService mailService;
+  final
+  MailService mailService;
 
-    final
-    UserService userService;
+  final
+  UserService userService;
 
-    final
-    PasswordEncoder encoder;
+  final
+  PasswordEncoder encoder;
 
-    final
-    JwtProvider jwtProvider;
+  final
+  JwtProvider jwtProvider;
 
-    final
-    ModelMapper modelMapper;
+  final
+  ModelMapper modelMapper;
 
-    final
-    RefreshTokenService refreshTokenService;
+  final
+  RefreshTokenService refreshTokenService;
 
+  @PostMapping("/register")
+  public ResponseDto<UserDto> registerUser(@Valid @RequestBody CreateUserForm createUserForm) {
+    UserDto createUserDto = userService.createUser(createUserForm);
 
-    @PostMapping("/register")
-    public ResponseEntity<ResponseDto> registerUser(@Valid @RequestBody CreateUserForm createUserForm) {
-        UserDto createUserDto = userService.createUser(createUserForm);
+    ResponseDto<UserDto> responseDto = new ResponseDto<>();
+    responseDto.setContent(createUserDto);
+    responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
+    responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
+    responseDto.setMessage(ErrorConstant.Message.SUCCESS);
 
-        ResponseDto responseDto = new ResponseDto();
-        responseDto.setContent(createUserDto);
-        responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
-        responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
-        responseDto.setMessage(ErrorConstant.Message.SUCCESS);
-        return ResponseEntity.ok().body(responseDto);
+    return responseDto;
+  }
+
+  @PostMapping("/login")
+  public ResponseDto<?> authenticateUser(@RequestBody LoginForm loginForm) {
+
+    ResponseDto<JwtResponse> responseDto = new ResponseDto<>();
+
+    UserEntity user = userService.findUserEntityByEmailForLogin(loginForm.getEmail());
+
+    if(!encoder.matches(loginForm.getPassword(),user.getPassword())){
+      throw new ProductException(new ErrorResponse(
+          ErrorConstant.Code.LOGIN_INVALID,
+          ErrorConstant.Type.LOGIN_INVALID,
+          ErrorConstant.Message.LOGIN_INVALID
+      ));
     }
 
-    @PostMapping("/login")
-    public ResponseDto<?> authenticateUser(@RequestBody LoginForm loginForm) {
-
-        ResponseDto<JwtResponse> responseDto = new ResponseDto<>();
-
-        UserEntity user = userService.findUserEntityByEmailForLogin(loginForm.getEmail());
-
-        if(!encoder.matches(loginForm.getPassword(),user.getPassword())){
-           throw new ProductException(new ErrorResponse(
-                   ErrorConstant.Code.LOGIN_INVALID,
-                   ErrorConstant.Type.LOGIN_INVALID,
-                   ErrorConstant.Message.LOGIN_INVALID
-           ));
-        }
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginForm.getEmail(),
-                        loginForm.getPassword()
-                )
+    Authentication authentication = authenticationManager.authenticate
+        (
+            new UsernamePasswordAuthenticationToken(
+                loginForm.getEmail(),
+                loginForm.getPassword()
+            )
         );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = jwtProvider.generateJwtToken(authentication);
+    UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
 
-        user.setAccessToken(jwt);
-        user.setTokenStatus(true);
+    String jwt = jwtProvider.generateJwtToken(authentication);
 
-        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user);
+    user.setAccessToken(jwt);
+    user.setTokenStatus(true);
 
-        List<String> roles = userPrinciple.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+    RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user);
 
-        responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
-        responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
-        responseDto.setMessage(ErrorConstant.Message.SUCCESS);
+    List<String> roles = userPrinciple.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 
-        responseDto.setContent(
-                new JwtResponse(
-                        jwt,
-                        refreshToken.getToken(),
-                        userPrinciple.getId(),
-                        userPrinciple.getUsername(),
-                        userPrinciple.getEmail(),
-                        roles
-                )
-        );
-        responseDto.setRemainTime(jwtProvider.getRemainTimeFromJwtToken(jwt));
+    responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
+    responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
+    responseDto.setMessage(ErrorConstant.Message.SUCCESS);
 
-        return responseDto;
+    responseDto.setContent(
+        new JwtResponse(
+            jwt,
+            refreshToken.getToken(),
+            userPrinciple.getId(),
+            userPrinciple.getUsername(),
+            userPrinciple.getEmail(),
+            roles
+        )
+    );
+
+    responseDto.setRemainTime(jwtProvider.getRemainTimeFromJwtToken(jwt));
+
+    return responseDto;
+  }
+
+  @SneakyThrows
+  @PostMapping("/forgotPassword")
+  public ResponseDto<?> forgotPassword(@RequestParam(name = "email",defaultValue = "") String email) {
+
+    if (StringUtils.isBlank(email)) {
+      log.error("parameter email empty => {}",() -> email);
+      throw new ProductException(
+          new ErrorResponse()
+      );
     }
 
-    @SneakyThrows
-    @PostMapping("/forgotPassword")
-    public ResponseDto<?> forgotPassword(@RequestParam(name = "email",defaultValue = "") String email) {
+    userService.forgotPassword(email);
 
-        if (StringUtils.isBlank(email)) {
-            log.error("parameter email empty => {}",() -> email);
-            throw new ProductException(
-                    new ErrorResponse()
+    ResponseDto<?> responseDto = new ResponseDto<>();
+    responseDto.setRemainTime(0L);
+    responseDto.setMessage(ErrorConstant.Code.SUCCESS);
+    responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
+    return responseDto;
+  }
+
+  @PostMapping("/refreshToken")
+  public ResponseDto<?> refreshToken(@RequestBody TokenRefreshRequest request) {
+    String requestRefreshToken = request.getRefreshToken();
+
+    return refreshTokenService.findByToken(requestRefreshToken)
+        .map(refreshTokenService::verifyExpiration)
+        .map(RefreshTokenEntity::getUserEntity)
+        .map(user -> {
+          String token = jwtProvider.generateTokenFromEmail(user.getEmail());
+          userService.saveToken(token,user);
+          Long timeRemain = jwtProvider.getRemainTimeFromJwtToken(token);
+          ResponseDto<TokenRefreshResponse> responseDto = new ResponseDto<>();
+          responseDto.setRemainTime(timeRemain);
+          responseDto.setMessage(ErrorConstant.Message.SUCCESS);
+          responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
+          responseDto.setContent(new TokenRefreshResponse(token, requestRefreshToken));
+          return responseDto;
+        })
+        .orElseThrow
+            (
+                () ->
+                    new TokenRefreshException
+                        (
+                            requestRefreshToken,
+                            "Refresh token is not in database!"
+                        )
             );
-        }
+  }
 
-        userService.forgotPassword(email);
 
-        ResponseDto<?> responseDto = new ResponseDto<>();
-        responseDto.setRemainTime(0L);
-        responseDto.setMessage(ErrorConstant.Code.SUCCESS);
-        responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
-        return responseDto;
+
+  @PostMapping("/logout")
+  public ResponseDto<?> logout(HttpServletRequest request, HttpServletResponse response) {
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null) {
+      throw new ProductException(
+          new ErrorResponse()
+      );
     }
 
-    @PostMapping("/refreshToken")
-    public ResponseDto<?> refreshToken(@RequestBody TokenRefreshRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
+    UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
 
-        return refreshTokenService.findByToken(requestRefreshToken)
-                .map(refreshTokenService::verifyExpiration)
-                .map(RefreshTokenEntity::getUserEntity)
-                .map(user -> {
-                    String token = jwtProvider.generateTokenFromEmail(user.getEmail());
-                    userService.saveToken(token,user);
-                    Long timeRemain = jwtProvider.getRemainTimeFromJwtToken(token);
-                    ResponseDto<TokenRefreshResponse> responseDto = new ResponseDto<>();
-                    responseDto.setRemainTime(timeRemain);
-                    responseDto.setMessage(ErrorConstant.Message.SUCCESS);
-                    responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
-                    responseDto.setContent(new TokenRefreshResponse(token, requestRefreshToken));
-                    return responseDto;
-                })
-                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
-                        "Refresh token is not in database!"));
-    }
+    UserEntity userEntity = userService.findUserEntityByEmail(userPrinciple.getEmail());
 
+    userService.clearToken(userEntity);
 
+    new SecurityContextLogoutHandler().logout(request,response,authentication);
 
-    @PostMapping("/logout")
-    public ResponseDto<?> logout(HttpServletRequest request, HttpServletResponse response) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new ProductException(
-                    new ErrorResponse());
-        }
-
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-
-        UserEntity userEntity = userService.findUserEntityByEmail(userPrinciple.getEmail());
-
-        userService.clearToken(userEntity);
-
-        new SecurityContextLogoutHandler().logout(request,response,authentication);
-
-        ResponseDto<TokenRefreshResponse> responseDto = new ResponseDto<>();
-        responseDto.setRemainTime(0L);
-        responseDto.setMessage(ErrorConstant.Message.SUCCESS);
-        responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
-        return responseDto;
-
-    }
+    ResponseDto<TokenRefreshResponse> responseDto = new ResponseDto<>();
+    responseDto.setRemainTime(0L);
+    responseDto.setMessage(ErrorConstant.Message.SUCCESS);
+    responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
+    return responseDto;
+  }
 }

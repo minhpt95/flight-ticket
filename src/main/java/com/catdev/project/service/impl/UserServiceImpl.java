@@ -5,8 +5,8 @@ import com.catdev.project.constant.ErrorConstant;
 import com.catdev.project.dto.ListResponseDto;
 import com.catdev.project.dto.user.UserDto;
 import com.catdev.project.entity.UserEntity;
-import com.catdev.project.jwt.exception.ErrorResponse;
-import com.catdev.project.jwt.exception.ProductException;
+import com.catdev.project.exception.ErrorResponse;
+import com.catdev.project.exception.ProductException;
 import com.catdev.project.readable.form.createForm.CreateUserForm;
 import com.catdev.project.readable.form.updateForm.UpdateUserForm;
 import com.catdev.project.readable.request.ChangePasswordReq;
@@ -19,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,19 +51,17 @@ public class UserServiceImpl implements UserService {
     Environment env;
 
     @Override
-    public UserEntity saveToken(String token, UserEntity userEntity) {
+    public void saveToken(String token, UserEntity userEntity) {
         userEntity.setAccessToken(token);
         userEntity.setTokenStatus(true);
-        userEntity = userRepository.saveAndFlush(userEntity);
-        return userEntity;
+        userRepository.saveAndFlush(userEntity);
     }
 
     @Override
-    public UserEntity clearToken(UserEntity userEntity) {
+    public void clearToken(UserEntity userEntity) {
         userEntity.setAccessToken(null);
         userEntity.setTokenStatus(false);
         userRepository.save(userEntity);
-        return userEntity;
     }
 
     @Override
@@ -85,7 +82,8 @@ public class UserServiceImpl implements UserService {
     public UserEntity findUserEntityByEmailForLogin(String email) {
         Optional<UserEntity> optionalUserEntity = userRepository.findByEmail(email);
 
-        if (optionalUserEntity.isEmpty()) {
+        if (optionalUserEntity.isEmpty())
+        {
             throw new ProductException(new ErrorResponse(
                     ErrorConstant.Code.LOGIN_INVALID,
                     ErrorConstant.Type.LOGIN_INVALID,
@@ -99,6 +97,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity findUserEntityByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public UserEntity findUserEntityByTelegramId(Long userTelegramId) {
+        return userRepository.findUserEntityByUserTelegramId(userTelegramId).orElse(null);
     }
 
     private UserDto convertToDto(UserEntity userEntity) {
@@ -118,8 +121,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ListResponseDto<UserDto> getUserList(int pageIndex, int pageSize) {
-        Page<UserEntity> page;
-        page = userRepository.findAll(CommonUtil.buildPageable(pageIndex, pageSize));
+        Page<UserEntity> page = userRepository.findAll(CommonUtil.buildPageable(pageIndex, pageSize));
         Page<UserDto> userDtoPage = page.map(this::convertToDto);
         ListResponseDto<UserDto> result = new ListResponseDto<>();
         return result.buildResponseList(userDtoPage, pageSize, pageIndex);
@@ -129,8 +131,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @SneakyThrows
     public UserDto createUser(CreateUserForm form) {
-        List<UserEntity> userEntityList = userRepository.findAllByEmail(form.getEmail());
-        if (!userEntityList.isEmpty()) {
+        Optional<UserEntity> userEntityList = userRepository.findAllByEmail(form.getEmail());
+        if (userEntityList.isPresent()) {
             throw new ProductException(
                     new ErrorResponse(
                             ErrorConstant.Code.ALREADY_EXISTS,
@@ -188,7 +190,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @SneakyThrows
-    public Boolean forgotPassword(String email) {
+    public void forgotPassword(String email) {
+
+        var isValidEmail = isAddressValid(email);
+
+        if(!isValidEmail){
+            log.error("email not valid => {}",() -> email);
+            throw new ProductException(
+                new ErrorResponse()
+            );
+        }
+
         UserEntity userEntity = userRepository.findUserEntityByEmail(email);
         if (userEntity == null) {
 
@@ -203,22 +215,6 @@ public class UserServiceImpl implements UserService {
 
         log.info("start forgotPassword()");
 
-        if (StringUtils.isBlank(email)) {
-            log.error("parameter email empty => {}",() -> email);
-            throw new ProductException(
-                    new ErrorResponse()
-            );
-        }
-
-        var isValidEmail = isAddressValid(email);
-
-        if(!isValidEmail){
-            log.error("email not valid => {}",() -> email);
-            throw new ProductException(
-                    new ErrorResponse()
-            );
-        }
-
         mailService.sendEmail(email,"Forgot Password","New password is : " + pwd);
 
         userEntity.setPassword(passwordEncoder.encode(pwd));
@@ -226,7 +222,6 @@ public class UserServiceImpl implements UserService {
 
         mailService.sendEmail(userEntity.getEmail(),"Forgot Password","New password for " + userEntity.getEmail() + " is : " + pwd);
 
-        return true;
     }
 
     @Override
@@ -246,14 +241,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean changeStatus(ChangeStatusAccountReq changeStatusAccountReq) {
+    public Boolean deactivateAccount(ChangeStatusAccountReq changeStatusAccountReq) {
         UserEntity userEntity = userRepository.findUserEntityById(changeStatusAccountReq.getId());
+
+        log.info("deactivate account user by {}",changeStatusAccountReq.getId());
+
         if (userEntity == null) {
+
             throw new ProductException(new ErrorResponse(ErrorConstant.Code.NOT_FOUND,
                     String.format(ErrorConstant.Message.NOT_EXISTS, changeStatusAccountReq.getId()),
                     ErrorConstant.Type.FAILURE));
+
         }
-        userEntity.setEnabled(changeStatusAccountReq.isStatus());
+
+        userEntity.setEnabled(false);
         userRepository.save(userEntity);
         return true;
     }
@@ -261,6 +262,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(UpdateUserForm form) {
         UserEntity userEntity = userRepository.findUserEntityById(form.getId());
+
+        log.info("update information user by {}",form.getId());
+
+
         if (userEntity == null) {
             throw new ProductException(new ErrorResponse(ErrorConstant.Code.NOT_FOUND,
                     String.format(ErrorConstant.Message.NOT_EXISTS, form.getId()),

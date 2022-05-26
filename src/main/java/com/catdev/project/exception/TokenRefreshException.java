@@ -1,4 +1,4 @@
-package com.catdev.project.jwt.exception;
+package com.catdev.project.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
