@@ -2,6 +2,7 @@ package com.catdev.project;
 
 import com.catdev.project.service.UserService;
 import com.catdev.project.util.CommonUtil;
+import com.catdev.project.util.DateUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.SpringApplication;
@@ -19,6 +20,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Date;
 import java.util.TimeZone;
 
 
@@ -54,7 +56,7 @@ public class ProjectApplication extends SpringBootServletInitializer {
     @EventListener(ApplicationReadyEvent.class)
     public void setApplicationTimeZone(){
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        log.info("TimeZone : {} , Instant : {} , Timestamp : {}", TimeZone::getDefault, Instant::now,() -> Timestamp.from(Instant.now()));
+        log.info("TimeZone : {} , Instant : {} , Timestamp : {}", TimeZone::getDefault, Instant::now,() -> Timestamp.from(DateUtil.getInstantNow()));
     }
 
     @EventListener(ApplicationReadyEvent.class)

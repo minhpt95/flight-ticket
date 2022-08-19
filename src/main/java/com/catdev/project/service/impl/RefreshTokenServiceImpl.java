@@ -8,12 +8,14 @@ import com.catdev.project.exception.TokenRefreshException;
 import com.catdev.project.respository.RefreshTokenRepository;
 import com.catdev.project.respository.UserRepository;
 import com.catdev.project.service.RefreshTokenService;
+import com.catdev.project.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +30,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Autowired
     private UserRepository userRepository;
+
+
 
     @Override
     public Optional<RefreshTokenEntity> findByToken(String token) {
@@ -45,6 +49,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshToken.setUserEntity(userEntity);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
+        refreshToken.setCreatedBy(userEntity.getId());
+        refreshToken.setCreatedTime(DateUtil.getInstantNow());
         refreshTokenRepository.save(refreshToken);
 
         return refreshToken;

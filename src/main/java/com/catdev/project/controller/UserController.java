@@ -10,6 +10,7 @@ import com.catdev.project.readable.request.ChangeStatusAccountReq;
 import com.catdev.project.service.RefreshTokenService;
 import com.catdev.project.service.UserService;
 
+import com.catdev.project.util.DateUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +28,6 @@ public class UserController {
 
     final
     PasswordEncoder encoder;
-
     final
     UserService userService;
 
@@ -44,9 +44,7 @@ public class UserController {
     public  ResponseDto<Boolean> activateEmail(@PathVariable Long id){
         ResponseDto<Boolean> responseDto = new ResponseDto<>();
 
-        Instant instant = Instant.now();
-
-        responseDto.setContent(userService.activateEmail(id,instant));
+        responseDto.setContent(userService.activateEmail(id, DateUtil.getInstantNow()));
         responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
         responseDto.setMessage(ErrorConstant.Message.SUCCESS);
         responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
@@ -66,27 +64,15 @@ public class UserController {
         return responseDto;
     }
 
-    @PutMapping(value = "/changeStatus")
-    public  ResponseDto<Boolean> changeStatus(@Valid @RequestBody ChangeStatusAccountReq changeStatusAccountReq){
-        ResponseDto<Boolean> responseDto = new ResponseDto<>();
-        
-        responseDto.setContent(userService.changeStatus(changeStatusAccountReq));
-        responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
-        responseDto.setMessage(ErrorConstant.Message.SUCCESS);
-        responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
-        
-        return responseDto;
-    }
-
     @PutMapping(value = "/updateUser")
     public ResponseDto<UserDto> updateUser (@RequestBody UpdateUserForm form) {
         ResponseDto<UserDto> responseDto = new ResponseDto<>();
-        
+
         responseDto.setContent(userService.updateUser(form));
         responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
         responseDto.setMessage(ErrorConstant.Message.SUCCESS);
         responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
-        
+
         return responseDto;
     }
 }

@@ -1,6 +1,7 @@
 package com.catdev.project.jwt;
 
 import com.catdev.project.security.service.UserPrinciple;
+import com.catdev.project.util.DateUtil;
 import io.jsonwebtoken.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
@@ -9,7 +10,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @Component
 @Log4j2
@@ -34,10 +43,11 @@ public class JwtProvider {
     }
 
     public String generateTokenFromEmail(String email){
+
         return Jwts.builder()
                 .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpiration))
+                .setIssuedAt(DateUtil.convertInstantToDate(Instant.now()))
+                .setExpiration(DateUtil.convertInstantToDate(Instant.now().plus(jwtExpiration,ChronoUnit.SECONDS)))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
@@ -53,7 +63,7 @@ public class JwtProvider {
         return Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
-                .getBody().getExpiration().getTime() - new Date().getTime();
+                .getBody().getExpiration().getTime() - DateUtil.getInstantNow().get(ChronoField.MILLI_OF_SECOND);
     }
 
     public boolean validateJwtToken(String authToken) {
@@ -62,18 +72,9 @@ public class JwtProvider {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return getRemainTimeFromJwtToken(authToken) > 0;
 
-        } catch (SignatureException e) {
-            log.error("Invalid JWT signature -> Message: {} ", e);
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token -> Message: {}", e);
-        } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token -> Message: {}", e);
-        } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token -> Message: {}", e);
-        } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty -> Message: {}", e);
+        } catch (Exception e) {
+            log.error("Error validateJwtToken -> Message : ",e);
         }
-
         return false;
     }
 }

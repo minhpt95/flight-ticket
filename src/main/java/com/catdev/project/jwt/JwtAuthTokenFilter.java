@@ -4,6 +4,7 @@ import com.catdev.project.respository.UserRepository;
 import com.catdev.project.security.service.UserDetailsServiceImpl;
 import com.catdev.project.security.service.UserPrinciple;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,9 +24,6 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
     private JwtProvider tokenProvider;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
     @Override
@@ -41,7 +39,6 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
             }
 
             if(!tokenProvider.validateJwtToken(jwt)){
-                log.error("Validate token failed");
                 filterChain.doFilter(request,response);
                 return;
             }
@@ -51,7 +48,6 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
             UserPrinciple userDetails = userDetailsService.loadUserByUsername(email);
 
             if(!jwt.equals(userDetails.getAccessToken())){
-                log.error("Wrong access token");
                 filterChain.doFilter(request,response);
                 return;
             }
@@ -71,7 +67,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
-            log.error("Can NOT set user authentication -> Message: {}", e);
+            log.error("Can NOT set user authentication -> Message", e);
         }
 
         filterChain.doFilter(request, response);
@@ -80,10 +76,14 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
     private String getJwt(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.replace("Bearer ","");
+        if(StringUtils.isBlank(authHeader)){
+            return null;
         }
 
-        return null;
+        if (!authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        return authHeader.replace("Bearer ","");
     }
 }

@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +19,6 @@ public class CreateUserForm {
     @NotEmpty
     private String name;
 
-    @NotEmpty
     private String email;
 
     @NotEmpty
@@ -36,4 +37,6 @@ public class CreateUserForm {
     @NotEmpty
     private String permanentAddress;
     private String description;
+
+    private MultipartFile avatarImage;
 }

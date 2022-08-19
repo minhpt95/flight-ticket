@@ -156,6 +156,9 @@ public class UserServiceImpl implements UserService {
         userEntity.setPhoneNumber2(form.getPhoneNumber2());
 
         userEntity.setCreatedTime(Instant.now());
+        userEntity.setCreatedBy(0L);
+        userEntity.setModifiedTime(Instant.now());
+        userEntity.setModifiedBy(0L);
 
         userEntity = userRepository.save(userEntity);
 
@@ -167,7 +170,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public Boolean activateEmail(Long id, Instant currentTime) {
         UserEntity userEntity = userRepository.findUserEntityById(id);
-        if (userEntity == null) {
+        if (userEntity == null)
+        {
             throw new ProductException(
                     new ErrorResponse(ErrorConstant.Code.NOT_FOUND,
                     String.format(ErrorConstant.Message.NOT_EXISTS, id),
@@ -175,7 +179,9 @@ public class UserServiceImpl implements UserService {
             );
         }
         Instant timeCreate = userEntity.getCreatedTime();
+
         Instant timeExpired = timeCreate.plus(7, ChronoUnit.DAYS);
+
         if (timeExpired.isBefore(currentTime)) {
             throw new ProductException(
                     new ErrorResponse(ErrorConstant.Code.NOT_FOUND,

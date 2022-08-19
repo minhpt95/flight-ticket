@@ -23,6 +23,7 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -66,8 +67,8 @@ public class AuthRestController {
   final
   RefreshTokenService refreshTokenService;
 
-  @PostMapping("/register")
-  public ResponseDto<UserDto> registerUser(@Valid @RequestBody CreateUserForm createUserForm) {
+  @PostMapping(value = "/register",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseDto<UserDto> registerUser(@Valid @ModelAttribute CreateUserForm createUserForm) {
     UserDto createUserDto = userService.createUser(createUserForm);
 
     ResponseDto<UserDto> responseDto = new ResponseDto<>();
@@ -108,8 +109,7 @@ public class AuthRestController {
 
     String jwt = jwtProvider.generateJwtToken(authentication);
 
-    user.setAccessToken(jwt);
-    user.setTokenStatus(true);
+    userService.saveToken(jwt,user);
 
     RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user);
 
@@ -118,7 +118,6 @@ public class AuthRestController {
     responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
     responseDto.setErrorType(ErrorConstant.Type.SUCCESS);
     responseDto.setMessage(ErrorConstant.Message.SUCCESS);
-
     responseDto.setContent(
         new JwtResponse(
             jwt,
@@ -129,9 +128,6 @@ public class AuthRestController {
             roles
         )
     );
-
-    responseDto.setRemainTime(jwtProvider.getRemainTimeFromJwtToken(jwt));
-
     return responseDto;
   }
 
@@ -149,15 +145,17 @@ public class AuthRestController {
     userService.forgotPassword(email);
 
     ResponseDto<?> responseDto = new ResponseDto<>();
-    responseDto.setRemainTime(0L);
     responseDto.setMessage(ErrorConstant.Code.SUCCESS);
     responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
     return responseDto;
   }
 
   @PostMapping("/refreshToken")
-  public ResponseDto<?> refreshToken(@RequestBody TokenRefreshRequest request) {
-    String requestRefreshToken = request.getRefreshToken();
+  public ResponseDto<?> refreshToken(
+          @RequestBody TokenRefreshRequest tokenRefreshRequest,
+          HttpServletResponse response
+  ) {
+    String requestRefreshToken = tokenRefreshRequest.getRefreshToken();
 
     return refreshTokenService.findByToken(requestRefreshToken)
         .map(refreshTokenService::verifyExpiration)
@@ -165,9 +163,7 @@ public class AuthRestController {
         .map(user -> {
           String token = jwtProvider.generateTokenFromEmail(user.getEmail());
           userService.saveToken(token,user);
-          Long timeRemain = jwtProvider.getRemainTimeFromJwtToken(token);
           ResponseDto<TokenRefreshResponse> responseDto = new ResponseDto<>();
-          responseDto.setRemainTime(timeRemain);
           responseDto.setMessage(ErrorConstant.Message.SUCCESS);
           responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
           responseDto.setContent(new TokenRefreshResponse(token, requestRefreshToken));
@@ -206,7 +202,6 @@ public class AuthRestController {
     new SecurityContextLogoutHandler().logout(request,response,authentication);
 
     ResponseDto<TokenRefreshResponse> responseDto = new ResponseDto<>();
-    responseDto.setRemainTime(0L);
     responseDto.setMessage(ErrorConstant.Message.SUCCESS);
     responseDto.setErrorCode(ErrorConstant.Code.SUCCESS);
     return responseDto;

@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ErrorResponse implements Serializable {
+public class ErrorResponse<T> implements Serializable {
 	
 	/**
 	 * 
@@ -20,6 +20,4 @@ public class ErrorResponse implements Serializable {
 	private String errorType;
 	private String message;
 	private String errorCode;
-
-
 }

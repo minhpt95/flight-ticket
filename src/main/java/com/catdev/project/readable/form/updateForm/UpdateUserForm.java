@@ -11,7 +11,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class UpdateUserForm extends CreateUserForm {
-
     @NotNull
     private Long id;
 }

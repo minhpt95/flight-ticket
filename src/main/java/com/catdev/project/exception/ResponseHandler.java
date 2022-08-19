@@ -2,12 +2,15 @@ package com.catdev.project.exception;
 
 import com.catdev.project.constant.ErrorConstant;
 import com.catdev.project.dto.ErrorBindingDto;
+import com.catdev.project.dto.ListResponseDto;
+import com.catdev.project.dto.ResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -60,29 +63,29 @@ public class ResponseHandler {
         return errorResponse;
     }
 
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    @ExceptionHandler(value = BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBindingErrors(MethodArgumentNotValidException ex) throws JsonProcessingException {
-        ErrorResponse errorResponse = new ErrorResponse();
+    public ResponseDto<List<?>> handleBindingErrors(BindException ex) {
+        ResponseDto<List<?>> errorResponse = new ResponseDto<>();
         errorResponse.setErrorCode(ErrorConstant.Code.SUCCESS);
 
         List<FieldError> errors = ex.getBindingResult().getFieldErrors();
 
-        List<ErrorBindingDto> errorBindingDtos = errors.stream().map(x -> {
+        List<ErrorBindingDto> errorBindingDtoList = errors.stream().map(x -> {
             ErrorBindingDto errorBindingDto = new ErrorBindingDto();
             errorBindingDto.setFieldError(x.getField());
             errorBindingDto.setErrorMessage(x.getDefaultMessage());
             return errorBindingDto;
         }).collect(Collectors.toList());
 
-        errorResponse.setMessage(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(errorBindingDtos));
+        errorResponse.setContent(errorBindingDtoList);
 
         return errorResponse;
     }
 
+
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-
     public ErrorResponse handleBindingErrors(HttpMessageNotReadableException ex) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorCode(ErrorConstant.Code.SUCCESS);
