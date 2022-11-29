@@ -64,13 +64,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers(
                 "/swagger-ui/**",
                 "/swagger-resources/**",
-                "/v2/**"
+                "/v2/**",
+                "/v3/**"
         );
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
 
         http.cors().and().csrf().disable();
 
@@ -78,7 +78,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/api/auth/register",
                 "/api/auth/login",
                 "/api/auth/forgotPassword",
-                "/api/user/activateEmail/**"
+                "/api/user/activateEmail/**",
+                "/"
         ).permitAll();
 
         http.authorizeRequests().anyRequest().authenticated()

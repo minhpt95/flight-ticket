@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @Log4j2
-@RequestMapping("/api/auth")
+@RequestMapping("/api/scheduler")
 public class ScheduleController {
 
     @Scheduled(cron = "* * * * * *")

@@ -221,8 +221,6 @@ public class UserServiceImpl implements UserService {
 
         log.info("start forgotPassword()");
 
-        mailService.sendEmail(email,"Forgot Password","New password is : " + pwd);
-
         userEntity.setPassword(passwordEncoder.encode(pwd));
         userRepository.save(userEntity);
 

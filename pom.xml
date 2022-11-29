@@ -178,7 +178,7 @@
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
-            <version>71.1</version>
+            <version>72.1</version>
         </dependency>
 
         <dependency>
@@ -187,13 +187,14 @@
             <version>2.11.0</version>
         </dependency>
 
-<!--        Bot telegram-->
-
+        <!--Thymeleaf Spring-->
         <dependency>
-            <groupId>com.github.pengrad</groupId>
-            <artifactId>java-telegram-bot-api</artifactId>
-            <version>6.0.1</version>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf-spring5</artifactId>
+            <version>3.1.0.RELEASE</version>
         </dependency>
+
+
 
     </dependencies>
 

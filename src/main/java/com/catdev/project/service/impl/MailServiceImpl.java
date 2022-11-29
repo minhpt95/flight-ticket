@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,18 +14,31 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Properties;
 
 @Service
 @Log4j2
 @AllArgsConstructor
 public class MailServiceImpl implements MailService {
 
+    private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=\"utf-8\"";
+
+    @Value("${config.mail.host}")
+    private String host;
+    @Value("${config.mail.port}")
+    private String port;
+    @Value("${config.mail.username}")
+    private String email;
+    @Value("${config.mail.password}")
+    private String password;
+
+    ThymeleafService thymeleafService;
     private final JavaMailSender sender;
 
     private final Environment env;
@@ -151,6 +165,37 @@ public class MailServiceImpl implements MailService {
             } catch (MessagingException | MailException | UnsupportedEncodingException e) {
                 log.error(ERROR_SEND_EMAIL, () -> e);
             }
+        }
+    }
+
+
+
+
+
+    public void sendMail() {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.port", port);
+
+        Session session = Session.getInstance(props,
+                new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(email, password);
+                    }
+                });
+        Message message = new MimeMessage(session);
+        try {
+            message.setRecipients(Message.RecipientType.TO, new InternetAddress[]{new InternetAddress("received_mail@domain.com")});
+
+            message.setFrom(new InternetAddress(email));
+            message.setSubject("Spring-email-with-thymeleaf subject");
+            message.setContent(thymeleafService.getContent(), CONTENT_TYPE_TEXT_HTML);
+            Transport.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
         }
     }
 }
