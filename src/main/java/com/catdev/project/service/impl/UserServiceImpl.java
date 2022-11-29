@@ -21,6 +21,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -162,7 +163,7 @@ public class UserServiceImpl implements UserService {
 
         userEntity = userRepository.save(userEntity);
 
-        mailService.sendEmail(userEntity.getEmail(),"Confirm your email address on Spring Boot App","Click this link to activate your account : " + env.getProperty("url.activate.account") + userEntity.getId());
+        mailService.sendActivationEmail(userEntity);
 
         return convertToDto(userEntity);
     }

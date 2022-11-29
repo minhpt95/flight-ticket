@@ -3,6 +3,7 @@ package com.catdev.project.service.impl;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.ObjectError;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -10,16 +11,15 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
+import java.util.Map;
+
 @Service
-public class ThymeleafService {
+public class ThymeleafServiceImpl {
     private static final String MAIL_TEMPLATE_BASE_NAME = "mail/MailMessages";
     private static final String MAIL_TEMPLATE_PREFIX = "/templates/";
     private static final String MAIL_TEMPLATE_SUFFIX = ".html";
     private static final String UTF_8 = "UTF-8";
-
-    private static final String TEMPLATE_NAME = "mail-template";
-
-    private static TemplateEngine templateEngine;
+    private static final TemplateEngine templateEngine;
 
     static {
         templateEngine = emailTemplateEngine();
@@ -48,12 +48,13 @@ public class ThymeleafService {
         return templateResolver;
     }
 
-    public String getContent() {
+    public String getContent(String templateName, Map<String, Object> mapContextVariable) {
         final Context context = new Context();
 
-        context.setVariable("name", "Messi");
-        context.setVariable("project_name", "spring-email-with-thymeleaf Demo");
+       for(Map.Entry<String,Object> entry : mapContextVariable.entrySet()){
+           context.setVariable(entry.getKey(),entry.getValue());
+       }
 
-        return templateEngine.process(TEMPLATE_NAME, context);
+        return templateEngine.process(templateName, context);
     }
 }

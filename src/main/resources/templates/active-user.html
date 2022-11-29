@@ -92,11 +92,11 @@
 
     <div class="activation__wrapper">
         <div class="activation__container">
-            <div class="activation__header"><img class="activation__logo" src="http://hortonworks.com/wp-content/uploads/2013/10/Fusionex-Logo-New.png" /></div>
+            <div class="activation__header"><img class="activation__logo" src="http://hortonworks.com/wp-content/uploads/2013/10/Fusionex-Logo-New.png"  alt=""/></div>
             <div class="activation__subject">Spring Boot Activation Link</div>
             <div class="activation__arrow"></div>
             <div class="activation__message">
-                <div> Dear, <span class="activation__user">Somebody</span>
+                <div> Dear, <span th:text="${email}" class="activation__user"></span>
                     <!--<Username>-->
                     <br/>Thank you for choosing our system</div>
             </div>
@@ -108,11 +108,12 @@
             </div>
             <div class="activation__footer">
                 Thank you. Sincerely,
-                <br/> Fusionex GIANT Support Team
+                <br/>Spring Boot Support Team
                 <br/>
             </div>
         </div>
     </div>
+    <title></title>
 </head>
 <body>
 
