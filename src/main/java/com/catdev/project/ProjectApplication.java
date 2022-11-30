@@ -16,6 +16,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.sql.Timestamp;
@@ -27,6 +28,7 @@ import java.util.TimeZone;
 @EntityScan(basePackages = {"com.catdev.project"})
 @EnableSwagger2
 @EnableScheduling
+@EnableWebMvc
 @EnableAsync
 @Log4j2
 @AllArgsConstructor
