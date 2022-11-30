@@ -10,10 +10,10 @@
     </parent>
     <packaging>war</packaging>
     <groupId>com.catdev</groupId>
-    <artifactId>project</artifactId>
+    <artifactId>ticket</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>project</name>
-    <description>project</description>
+    <name>ticket</name>
+    <description>Flight Ticket</description>
     <properties>
         <java.version>17</java.version>
     </properties>
