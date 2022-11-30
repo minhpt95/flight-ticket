@@ -3,7 +3,6 @@ package com.catdev.project.service.impl;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.ObjectError;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -25,20 +24,20 @@ public class ThymeleafServiceImpl {
         templateEngine = emailTemplateEngine();
     }
 
-    private static TemplateEngine emailTemplateEngine() {
+    public static TemplateEngine emailTemplateEngine() {
         final SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(htmlTemplateResolver());
         templateEngine.setTemplateEngineMessageSource(emailMessageSource());
         return templateEngine;
     }
 
-    private static MessageSource emailMessageSource() {
+    public static MessageSource emailMessageSource() {
         final ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
         messageSource.setBasename(MAIL_TEMPLATE_BASE_NAME);
         return messageSource;
     }
 
-    private static ITemplateResolver htmlTemplateResolver() {
+    public static ITemplateResolver htmlTemplateResolver() {
         final ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setPrefix(MAIL_TEMPLATE_PREFIX);
         templateResolver.setSuffix(MAIL_TEMPLATE_SUFFIX);

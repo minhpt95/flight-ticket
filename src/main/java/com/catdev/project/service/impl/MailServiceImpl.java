@@ -66,7 +66,7 @@ public class MailServiceImpl implements MailService {
     @Async
     public void sendEmailAttach(String[] to, String subject, String body, String fileName, File file) {
         log.info("start send email attach file to multiple people; to: {}; subject: {}; fileName: {}", () -> Arrays.toString(to), () -> subject, () -> fileName);
-        if (to.length <= 0) {
+        if (to.length == 0) {
             log.error(RECIPIENT_EMPTY);
         } else {
             try {
@@ -115,7 +115,7 @@ public class MailServiceImpl implements MailService {
     @Override
     @Async
     public void sendEmail(String[] to, String subject, String body) {
-        if (to.length <= 0) {
+        if (to.length == 0) {
             log.error(RECIPIENT_EMPTY);
         } else {
             try {
@@ -138,7 +138,7 @@ public class MailServiceImpl implements MailService {
     @Override
     @Async
     public void sendEmail(String[] to, String from, String personal, String subject, String body) {
-        if (to.length <= 0) {
+        if (to.length == 0) {
             log.error(RECIPIENT_EMPTY);
         } else {
             try {
