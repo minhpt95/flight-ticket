@@ -23,7 +23,7 @@ import java.util.TimeZone;
 
 
 @SpringBootApplication
-@EntityScan(basePackages = {"com.catdev.project"})
+@EntityScan(basePackages = {"com.catdev.ticket"})
 @EnableScheduling
 @EnableWebMvc
 @EnableAsync

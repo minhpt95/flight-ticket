@@ -23,7 +23,7 @@ public class SwaggerConfig {
                 .securityContexts(List.of(securityContext()))
                 .securitySchemes(List.of(apiKey()))
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.catdev.project.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.catdev.ticket.controller"))
                 .paths(PathSelectors.any())
                 .build();
     }
